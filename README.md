@@ -35,6 +35,9 @@ This toolkit provides a reproducible Python workflow for electrochemical signal 
 - Provide a notebook demo for the full biosensor workflow
 
 ## Example Workflows
+```markdown
+For details on the analysis workflow and methodological assumptions, see [Methodology](docs/methodology.md).
+
 ### Single CV Analysis
 
 ```text
@@ -70,6 +73,7 @@ replicate measurements -> mean/SD/RSD summary -> calibration fit -> LOD/LOQ -> r
 ```text
 simulated biosensor replicates -> calibration summary -> error-bar plot -> Markdown report -> notebook demo
 ```
+
 
 ## Project Structure
 
