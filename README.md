@@ -259,7 +259,6 @@ Run the test suite:
 python3 -m pytest
 ```
 
-```markdown
 The test suite covers data import, simulation, preprocessing, peak detection, feature extraction, calibration, batch analysis, report generation, and the full workflow helper.
 
 ## Development Status
