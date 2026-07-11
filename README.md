@@ -1,5 +1,5 @@
 
-```markdown
+
 # Electrochemical Signal Analysis Toolkit
 
 A Python toolkit for preprocessing, visualization, peak detection, feature extraction, batch analysis, calibration, and report generation for electrochemical sensing data.
