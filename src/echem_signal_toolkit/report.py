@@ -70,6 +70,78 @@ def generate_markdown_report(
 
     return output_path
 
+def generate_calibration_report(
+    *,
+    output_path: str | Path,
+    title: str,
+    performance: dict[str, float | int | str | None],
+    replicate_summary: pd.DataFrame | None = None,
+    plot_path: str | Path | None = None,
+    notes: str | None = None,
+) -> Path:
+    """
+    Generate a Markdown report for calibration analysis.
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    lines: list[str] = [
+        f"# {title}",
+        "",
+        "## Calibration Performance",
+        "",
+        "| Metric | Value |",
+        "|---|---:|",
+    ]
+
+    for key, value in performance.items():
+        lines.append(f"| `{key}` | {_format_value(value)} |")
+
+    if replicate_summary is not None:
+        lines.extend(
+            [
+                "",
+                "## Replicate Summary",
+                "",
+                "| Concentration | Mean Signal | SD | n | RSD (%) |",
+                "|---:|---:|---:|---:|---:|",
+            ]
+        )
+
+        for _, row in replicate_summary.iterrows():
+            lines.append(
+                "| "
+                f"{_format_value(row.get('concentration'))} | "
+                f"{_format_value(row.get('signal_mean'))} | "
+                f"{_format_value(row.get('signal_std'))} | "
+                f"{_format_value(row.get('signal_count'))} | "
+                f"{_format_value(row.get('signal_rsd_percent'))} |"
+            )
+
+    if plot_path is not None:
+        plot_path = Path(plot_path)
+        lines.extend(
+            [
+                "",
+                "## Plot",
+                "",
+                f"![Calibration plot]({plot_path.as_posix()})",
+            ]
+        )
+
+    if notes:
+        lines.extend(
+            [
+                "",
+                "## Notes",
+                "",
+                notes,
+            ]
+        )
+
+    output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    return output_path
 
 def _peaks_to_markdown_lines(peaks: pd.DataFrame) -> list[str]:
     display = peaks.copy()

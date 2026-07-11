@@ -27,9 +27,14 @@ This toolkit provides a reproducible Python workflow for electrochemical signal 
 - Estimate limit of detection from blank measurements
 - Generate plots and Markdown analysis reports
 - Provide example scripts and test coverage
+- Perform replicate-aware calibration analysis
+- Calculate replicate mean, standard deviation, count, and RSD
+- Estimate both LOD and LOQ from blank measurements
+- Plot calibration curves with error bars
+- Generate Markdown calibration reports
+- Provide a notebook demo for the full biosensor workflow
 
 ## Example Workflows
-
 ### Single CV Analysis
 
 ```text
@@ -54,6 +59,18 @@ multiple CV files -> batch summary -> calibration curve -> LOD estimate
 multiple DPV files -> batch summary -> calibration curve -> LOD estimate
 ```
 
+### Replicate-Aware Calibration
+
+```text
+replicate measurements -> mean/SD/RSD summary -> calibration fit -> LOD/LOQ -> report
+```
+
+### Full Biosensor Workflow Demo
+
+```text
+simulated biosensor replicates -> calibration summary -> error-bar plot -> Markdown report -> notebook demo
+```
+
 ## Project Structure
 
 ```text
@@ -63,16 +80,21 @@ electrochemical-signal-analysis-toolkit/
 │   └── raw/
 ├── docs/
 ├── examples/
+│   ├── __init__.py
 │   ├── basic_cv_analysis.py
 │   ├── basic_dpv_analysis.py
 │   ├── batch_cv_analysis.py
 │   ├── batch_dpv_analysis.py
 │   ├── batch_to_calibration.py
 │   ├── batch_dpv_to_calibration.py
-│   └── calibration_analysis.py
+│   ├── calibration_analysis.py
+│   ├── replicate_calibration_analysis.py
+│   ├── full_biosensor_workflow.py
+│   └── create_demo_notebook.py
 ├── learning-notes/
 │   └── cv-and-dpv-basics.md
 ├── notebooks/
+│   └── demo_biosensor_workflow.ipynb
 ├── src/
 │   └── echem_signal_toolkit/
 │       ├── __init__.py
@@ -149,6 +171,22 @@ python3 examples/batch_to_calibration.py
 python3 examples/batch_dpv_to_calibration.py
 ```
 
+Run replicate calibration analysis:
+
+```bash
+python3 examples/replicate_calibration_analysis.py
+
+Run the full biosensor workflow:
+
+```bash
+python3 examples/full_biosensor_workflow.py
+
+Generate the demo notebook:
+
+```bash
+python3 examples/create_demo_notebook.py
+
+
 ## Example Python Usage
 
 ```python
@@ -221,6 +259,9 @@ Run the test suite:
 python3 -m pytest
 ```
 
+```markdown
+The test suite covers data import, simulation, preprocessing, peak detection, feature extraction, calibration, batch analysis, report generation, and the full workflow helper.
+
 ## Development Status
 
 This project is in early active development. The current version focuses on reproducible CV and DPV signal analysis workflows for electrochemical biosensor data.
@@ -229,15 +270,12 @@ This project is in early active development. The current version focuses on repr
 
 Planned improvements include:
 
-- Replicate-aware calibration statistics
-- Batch DPV calibration utilities
+- Calibration plots with confidence intervals
 - More advanced baseline correction methods
-- Calibration plots with error bars
-- Limit of quantification estimation
 - Amperometry analysis
 - EIS visualization and feature extraction
 - Compatibility presets for common instrument export formats
-- HTML or PDF report generation
+- HTML or PDF report export
 
 ## Research Context
 

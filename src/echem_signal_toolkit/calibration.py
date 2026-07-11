@@ -223,6 +223,110 @@ def build_calibration_table(
         }
     )
 
+def summarize_replicates(
+    df: pd.DataFrame,
+    *,
+    concentration_col: str = "concentration",
+    signal_col: str = "signal",
+) -> pd.DataFrame:
+    """
+    Summarize replicate measurements by concentration.
+
+    Returns mean, standard deviation, replicate count, and RSD percentage.
+    """
+    _require_columns(df, [concentration_col, signal_col])
+
+    summary = (
+        df.groupby(concentration_col, as_index=False)
+        .agg(
+            signal_mean=(signal_col, "mean"),
+            signal_std=(signal_col, "std"),
+            signal_count=(signal_col, "count"),
+        )
+        .sort_values(concentration_col)
+        .reset_index(drop=True)
+    )
+
+    summary["signal_std"] = summary["signal_std"].fillna(0.0)
+
+    summary["signal_rsd_percent"] = summary.apply(
+        lambda row: _rsd_percent(row["signal_mean"], row["signal_std"]),
+        axis=1,
+    )
+
+    return summary
+
+
+def fit_replicate_calibration_curve(
+    replicate_summary: pd.DataFrame,
+    *,
+    concentration_col: str = "concentration",
+    signal_mean_col: str = "signal_mean",
+) -> dict[str, float | int]:
+    """
+    Fit a calibration curve using replicate mean signals.
+    """
+    _require_columns(replicate_summary, [concentration_col, signal_mean_col])
+
+    calibration = replicate_summary.rename(
+        columns={
+            concentration_col: "concentration",
+            signal_mean_col: "signal",
+        }
+    )
+
+    return fit_calibration_curve(calibration)
+
+
+def estimate_loq(
+    blank_signals: list[float] | np.ndarray | pd.Series,
+    *,
+    slope: float,
+    multiplier: float = 10.0,
+) -> float:
+    """
+    Estimate limit of quantification using:
+
+        LOQ = multiplier * standard deviation of blank / slope
+
+    A common choice is multiplier=10.
+    """
+    return estimate_lod(
+        blank_signals,
+        slope=slope,
+        multiplier=multiplier,
+    )
+
+
+def calibration_performance_summary(
+    *,
+    fit_result: dict[str, float | int],
+    lod: float | None = None,
+    loq: float | None = None,
+    concentration_unit: str = "uM",
+    signal_unit: str = "A",
+) -> dict[str, float | str | None]:
+    """
+    Build a compact summary of calibration performance.
+    """
+    return {
+        "sensitivity": fit_result["slope"],
+        "sensitivity_unit": f"{signal_unit}/{concentration_unit}",
+        "intercept": fit_result["intercept"],
+        "r_squared": fit_result["r_squared"],
+        "lod": lod,
+        "lod_unit": concentration_unit,
+        "loq": loq,
+        "loq_unit": concentration_unit,
+        "n_points": fit_result["n_points"],
+    }
+
+
+def _rsd_percent(mean: float, std: float) -> float | None:
+    if mean == 0:
+        return None
+
+    return float(abs(std / mean) * 100)
 
 def _require_columns(df: pd.DataFrame, columns: list[str]) -> None:
     missing = [column for column in columns if column not in df.columns]

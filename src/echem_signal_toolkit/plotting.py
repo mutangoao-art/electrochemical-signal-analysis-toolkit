@@ -177,6 +177,68 @@ def plot_calibration_curve(
 
     return ax
 
+def plot_replicate_calibration_curve(
+    replicate_summary: pd.DataFrame,
+    fit_result: dict[str, float | int],
+    *,
+    concentration_col: str = "concentration",
+    signal_mean_col: str = "signal_mean",
+    signal_std_col: str = "signal_std",
+    title: str = "Replicate Calibration Curve",
+    concentration_unit: str = "uM",
+    signal_unit: str = "A",
+    ax=None,
+):
+    """
+    Plot replicate calibration data with error bars and fitted line.
+    """
+    _require_columns(
+        replicate_summary,
+        [concentration_col, signal_mean_col, signal_std_col],
+    )
+
+    if ax is None:
+        _, ax = plt.subplots(figsize=(7, 5))
+
+    x = replicate_summary[concentration_col].to_numpy(dtype=float)
+    y = replicate_summary[signal_mean_col].to_numpy(dtype=float)
+    yerr = replicate_summary[signal_std_col].to_numpy(dtype=float)
+
+    x_fit = pd.Series([x.min(), x.max()])
+    y_fit = fit_result["slope"] * x_fit + fit_result["intercept"]
+
+    ax.errorbar(
+        x,
+        y,
+        yerr=yerr,
+        fmt="o",
+        color="tab:blue",
+        ecolor="tab:gray",
+        capsize=4,
+        label="Mean ± SD",
+        zorder=3,
+    )
+
+    ax.plot(x_fit, y_fit, color="tab:red", label="Linear fit")
+
+    ax.set_title(title)
+    ax.set_xlabel(f"Concentration ({concentration_unit})")
+    ax.set_ylabel(f"Signal ({signal_unit})")
+    ax.grid(True, alpha=0.3)
+
+    ax.text(
+        0.05,
+        0.95,
+        f"y = {fit_result['slope']:.3g}x + {fit_result['intercept']:.3g}\n"
+        f"R² = {fit_result['r_squared']:.4f}",
+        transform=ax.transAxes,
+        va="top",
+        bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
+    )
+
+    ax.legend()
+
+    return ax
 
 def _current_display_scale(current_unit: str) -> tuple[float, str]:
     normalized_unit = current_unit.strip().lower()
