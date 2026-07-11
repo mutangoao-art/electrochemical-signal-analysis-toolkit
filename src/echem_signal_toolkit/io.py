@@ -220,3 +220,61 @@ def _current_scale(current_unit: str) -> float:
         raise ValueError(f"Unsupported current unit: {current_unit}. Allowed units: {allowed}")
 
     return CURRENT_UNIT_SCALE[normalized_unit]
+
+def read_chi_amperometry_data(
+    file_path: str | Path,
+    *,
+    encoding: str = "utf-8",
+) -> pd.DataFrame:
+    """
+    Read CH Instruments amperometric i-t data.
+
+    The function searches for the data header line starting with 'Time/s'
+    and returns standardized columns such as:
+    - time_s
+    - i4_a
+    - i6_a
+    - i8_a
+    """
+    file_path = Path(file_path)
+    lines = file_path.read_text(encoding=encoding).splitlines()
+
+    header_index = None
+
+    for index, line in enumerate(lines):
+        if line.strip().lower().startswith("time/s"):
+            header_index = index
+            break
+
+    if header_index is None:
+        raise ValueError("Could not find amperometry data header starting with 'Time/s'")
+
+    raw = pd.read_csv(
+        file_path,
+        skiprows=header_index,
+        sep=",",
+        engine="python",
+        encoding=encoding,
+    )
+
+    raw.columns = [str(column).strip() for column in raw.columns]
+
+    column_map = {}
+
+    for column in raw.columns:
+        normalized = column.strip().lower()
+
+        if normalized == "time/s":
+            column_map[column] = "time_s"
+        elif normalized.startswith("i") and normalized.endswith("/a"):
+            channel = normalized.replace("/a", "").replace(" ", "")
+            column_map[column] = f"{channel}_a"
+
+    standardized = raw.rename(columns=column_map)
+
+    for column in standardized.columns:
+        standardized[column] = pd.to_numeric(standardized[column], errors="coerce")
+
+    standardized = standardized.dropna(subset=["time_s"]).reset_index(drop=True)
+
+    return standardized

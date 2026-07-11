@@ -109,6 +109,31 @@ For DPV data, the main oxidation peak is commonly used as the analytical signal 
 
 Feature extraction converts processed electrochemical signals into quantitative descriptors.
 
+## Amperometry Analysis
+
+Amperometry measures current as a function of time under a fixed applied potential. It is commonly used in biosensor experiments to monitor current responses after analyte addition or during stability measurements.
+
+The toolkit supports amperometric current-time data with standardized columns such as:
+
+| Column | Meaning |
+|---|---|
+| `time_s` | Time in seconds |
+| `i4_a`, `i6_a`, `i8_a` | Current channels in amperes |
+
+For each selected channel, the analysis calculates:
+
+| Feature | Meaning |
+|---|---|
+| `baseline_current_a` | Mean current in the baseline window |
+| `steady_state_current_a` | Mean current in the response window |
+| `response_current_a` | Difference between steady-state and baseline current |
+| `noise_std_a` | Standard deviation of baseline current |
+| `snr` | Absolute response current divided by baseline noise |
+
+If explicit baseline and response windows are not provided, the first 20 percent of data points are used as the baseline window and the last 20 percent are used as the response window.
+
+The current implementation assumes that the user can define meaningful baseline and response windows. Automatic injection-point detection and kinetic fitting are left for future development.
+
 ### CV Features
 
 The CV feature extraction workflow includes:
@@ -263,6 +288,8 @@ This toolkit is currently an early-stage research-oriented project. The followin
 - Instrument-specific file format presets are not yet implemented.
 - EIS analysis is not yet implemented.
 - Experimental validation with real electrochemical datasets is still needed.
+- Amperometry response analysis currently depends on user-defined baseline and response windows.
+- Automatic analyte injection detection is not yet implemented.
 
 These limitations are intentional boundaries of the current version and guide future development.
 

@@ -33,6 +33,10 @@ This toolkit provides a reproducible Python workflow for electrochemical signal 
 - Plot calibration curves with error bars
 - Generate Markdown calibration reports
 - Provide a notebook demo for the full biosensor workflow
+- Analyze amperometric current-time data
+- Extract baseline current, steady-state current, response current, noise, and SNR
+- Run batch amperometry analysis for multiple files and channels
+- Read CH Instruments amperometric i-t exports
 
 ## Example Workflows
 ```markdown
@@ -74,6 +78,16 @@ replicate measurements -> mean/SD/RSD summary -> calibration fit -> LOD/LOQ -> r
 simulated biosensor replicates -> calibration summary -> error-bar plot -> Markdown report -> notebook demo
 ```
 
+### Amperometry Analysis
+
+```text
+amperometric i-t data -> baseline/response windows -> response current -> channel summary
+
+### Batch Amperometry
+
+```text
+multiple i-t files -> channel-wise response summary -> future metadata/calibration workflow
+
 
 ## Project Structure
 
@@ -85,6 +99,8 @@ electrochemical-signal-analysis-toolkit/
 ├── docs/
 ├── examples/
 │   ├── __init__.py
+│   ├── basic_amperometry_analysis.py
+│   ├── batch_amperometry_analysis.py
 │   ├── basic_cv_analysis.py
 │   ├── basic_dpv_analysis.py
 │   ├── batch_cv_analysis.py
@@ -102,6 +118,7 @@ electrochemical-signal-analysis-toolkit/
 ├── src/
 │   └── echem_signal_toolkit/
 │       ├── __init__.py
+│       ├── amperometry.py
 │       ├── batch.py
 │       ├── calibration.py
 │       ├── dpv.py
@@ -190,6 +207,11 @@ Generate the demo notebook:
 ```bash
 python3 examples/create_demo_notebook.py
 
+Run amperometry analysis:
+
+```bash
+python3 examples/basic_amperometry_analysis.py
+
 
 ## Example Python Usage
 
@@ -200,7 +222,7 @@ from echem_signal_toolkit.peaks import detect_cv_peaks
 from echem_signal_toolkit.features import extract_cv_features
 
 data = load_cv_data("data/raw/simulated_cv.csv")
-
+![![alt text](image-1.png)](image.png)
 processed = smooth_current(data)
 processed = baseline_correct_current(
     processed,
@@ -224,7 +246,7 @@ print(features)
 
 ## Standardized Data Format
 
-Internally, electrochemical data are standardized to the following column names:
+Internally, CV and DPV data are standardized to the following column names:
 
 | Column | Description |
 |---|---|
@@ -233,7 +255,12 @@ Internally, electrochemical data are standardized to the following column names:
 | `time_s` | Time in seconds, if available |
 | `cycle` | Cycle or segment number, if available |
 
-The import functions support explicit column mapping and current unit conversion.
+For amperometric current-time data, the standardized format uses:
+
+| Column | Description |
+|---|---|
+| `time_s` | Time in seconds |
+| `i4_a`, `i6_a`, ... | Current channels in amperes |
 
 ## Simulated Data
 

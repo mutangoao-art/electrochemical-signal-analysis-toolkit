@@ -37,6 +37,7 @@ data/raw/batch_cv/*
 data/raw/batch_calibration_cv/*
 data/raw/batch_dpv/*
 data/raw/batch_dpv_calibration/*
+data/raw/batch_amperometry/*
 
 # Keep directory structure
 !data/processed/.gitkeep

@@ -240,6 +240,53 @@ def plot_replicate_calibration_curve(
 
     return ax
 
+def plot_amperometry(
+    df: pd.DataFrame,
+    *,
+    time_col: str = "time_s",
+    current_cols: list[str] | None = None,
+    title: str = "Amperometric i-t Curve",
+    current_unit: str = "nA",
+    ax=None,
+):
+    """
+    Plot amperometric current-time data.
+    """
+    if time_col not in df.columns:
+        raise ValueError(f"Missing time column: {time_col}")
+
+    if current_cols is None:
+        current_cols = [
+            column for column in df.columns
+            if column.startswith("i") and column.endswith("_a")
+        ]
+
+    if not current_cols:
+        raise ValueError("No amperometry current columns found")
+
+    _require_columns(df, current_cols)
+
+    if ax is None:
+        _, ax = plt.subplots(figsize=(7, 5))
+
+    current_scale, current_label = _current_display_scale(current_unit)
+
+    for current_col in current_cols:
+        ax.plot(
+            df[time_col],
+            df[current_col] * current_scale,
+            linewidth=1.5,
+            label=current_col.replace("_a", ""),
+        )
+
+    ax.set_title(title)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel(f"Current ({current_label})")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+
+    return ax
+
 def _current_display_scale(current_unit: str) -> tuple[float, str]:
     normalized_unit = current_unit.strip().lower()
 
